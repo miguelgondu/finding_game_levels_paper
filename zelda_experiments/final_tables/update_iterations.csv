@@ -1,0 +1,9 @@
+,sampleMCTS,sampleRHEA,doNothing,sampleRS,olets,sampleRandom,sampleonesteplookahead,greedyTreeSearch
+sampleMCTS_prior,0,2,21,2,14,21,14,18
+sampleRHEA_prior,3,0,21,3,21,20,19,2
+doNothing_prior,3,2,0,0,3,2,15,2
+sampleRS_prior,2,3,21,0,3,21,14,4
+olets_prior,1,1,21,2,0,21,21,3
+sampleRandom_prior,21,21,21,21,21,0,3,11
+sampleonesteplookahead_prior,9,5,21,5,17,21,0,3
+greedyTreeSearch_prior,10,10,21,3,21,9,12,0

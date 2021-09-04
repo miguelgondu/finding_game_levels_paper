@@ -1,0 +1,9 @@
+,easy,medium_easy,medium,medium_hard,hard,totals
+olets,326,2,1,0,0,329
+sampleMCTS,319,30,5,2,0,356
+sampleRHEA,246,82,13,1,0,342
+sampleRS,268,53,6,1,0,328
+greedyTreeSearch,111,79,69,39,34,332
+sampleonesteplookahead,60,17,22,14,220,333
+sampleRandom,48,9,33,41,191,322
+doNothing,0,0,0,0,341,341
