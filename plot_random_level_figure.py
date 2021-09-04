@@ -1,3 +1,6 @@
+"""
+Plots Fig. 3
+"""
 import matplotlib.pyplot as plt
 from zelda_map_elites_utils import random_solution, random_variation
 from visualization_utils import plot_level_from_array, save_level_from_array
@@ -23,8 +26,24 @@ while True:
     plt.show()
     flag = input("Save these? (y/[n]): ")
     if flag == "y":
-        save_level_from_array(level, f"./zelda_experiments/final_plots/random_variations_viz/original_{timestamp}.jpg", dpi=150)
-        save_level_from_array(var1, f"./zelda_experiments/final_plots/random_variations_viz/var1_{timestamp}.jpg", dpi=150)
-        save_level_from_array(var2, f"./zelda_experiments/final_plots/random_variations_viz/var2_{timestamp}.jpg",  dpi=150)
-        save_level_from_array(var3, f"./zelda_experiments/final_plots/random_variations_viz/var3_{timestamp}.jpg", dpi=150)
+        save_level_from_array(
+            level,
+            f"./zelda_experiments/final_plots/random_variations_viz/original_{timestamp}.jpg",
+            dpi=150,
+        )
+        save_level_from_array(
+            var1,
+            f"./zelda_experiments/final_plots/random_variations_viz/var1_{timestamp}.jpg",
+            dpi=150,
+        )
+        save_level_from_array(
+            var2,
+            f"./zelda_experiments/final_plots/random_variations_viz/var2_{timestamp}.jpg",
+            dpi=150,
+        )
+        save_level_from_array(
+            var3,
+            f"./zelda_experiments/final_plots/random_variations_viz/var3_{timestamp}.jpg",
+            dpi=150,
+        )
     plt.close()

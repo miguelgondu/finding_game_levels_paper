@@ -25,7 +25,7 @@ def segment_levels(filepath, path_to_experiment):
 
     with open(filepath) as fp:
         generation = json.load(fp)
-    
+
     for doc in generation.values():
         if doc["performance"] is not None:
             results = doc["metadata"]
@@ -36,15 +36,36 @@ def segment_levels(filepath, path_to_experiment):
             winrate = sum(wins) / len(wins)
 
             if winrate < 0.2:
-                save_level_from_array(level, f"{path_to_experiment}/hard/{experiment_id}.jpg", f"Winrate: {winrate}")
+                save_level_from_array(
+                    level,
+                    f"{path_to_experiment}/hard/{experiment_id}.jpg",
+                    f"Winrate: {winrate}",
+                )
             elif 0.2 <= winrate < 0.4:
-                save_level_from_array(level, f"{path_to_experiment}/medium_hard/{experiment_id}.jpg", f"Winrate: {winrate}")
+                save_level_from_array(
+                    level,
+                    f"{path_to_experiment}/medium_hard/{experiment_id}.jpg",
+                    f"Winrate: {winrate}",
+                )
             elif 0.4 <= winrate < 0.6:
-                save_level_from_array(level, f"{path_to_experiment}/medium/{experiment_id}.jpg", f"Winrate: {winrate}")
+                save_level_from_array(
+                    level,
+                    f"{path_to_experiment}/medium/{experiment_id}.jpg",
+                    f"Winrate: {winrate}",
+                )
             elif 0.6 <= winrate < 0.8:
-                save_level_from_array(level, f"{path_to_experiment}/medium_easy/{experiment_id}.jpg", f"Winrate: {winrate}")
+                save_level_from_array(
+                    level,
+                    f"{path_to_experiment}/medium_easy/{experiment_id}.jpg",
+                    f"Winrate: {winrate}",
+                )
             elif 0.8 <= winrate <= 1:
-                save_level_from_array(level, f"{path_to_experiment}/easy/{experiment_id}.jpg", f"Winrate: {winrate}")
+                save_level_from_array(
+                    level,
+                    f"{path_to_experiment}/easy/{experiment_id}.jpg",
+                    f"Winrate: {winrate}",
+                )
+
 
 # @click.command()
 # @click.argument("filepath", type=str, default="")
@@ -53,6 +74,7 @@ def segment_levels(filepath, path_to_experiment):
 def segment_generation(filepath, experiment_name, path_to_seg):
     path_to_experiment = f"{path_to_seg}/{experiment_name}"
     segment_levels(filepath, path_to_experiment)
+
 
 generations = {
     "olets": "./zelda_experiments/generations/generation_olets_2020_03_12_20h_10_gens_50_iter_100_init_40_roll_23_seed_00009.json",
@@ -68,4 +90,3 @@ generations = {
 path_to_seg = "./zelda_experiments/levels_segmented"
 for experiment_name, filepath in generations.items():
     segment_generation(filepath, experiment_name, path_to_seg)
-
