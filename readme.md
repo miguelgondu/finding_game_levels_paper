@@ -1,6 +1,11 @@
-# Zelda experiments
+# Code for Finding Game Levels
 
-All the agents that are implemented in the GVGAI singlePlayer track are the following:
+This repo contains all the code related to the paper *Finding Game Levels with the Right Difficulty in a Few Trials through Intelligent Trial-and-Error*. See the paper on arxiv [here](https://arxiv.org/abs/2005.07677), and on IEEE Explore [here](https://ieeexplore.ieee.org/abstract/document/9231548/).
+
+# A guide through the code
+This code relies on two small libraries I wrote, which implement MAP-Elites and ITAE.
+
+# TL;DR
 
 - **sampleRandomController** ("tracks.singlePlayer.simple.sampleRandom.Agent"): a controller that takes random actions.
 - **doNothingController** ("tracks.singlePlayer.simple.doNothing.Agent"): a controller that does nothing.

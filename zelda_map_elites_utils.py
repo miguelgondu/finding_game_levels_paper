@@ -6,6 +6,7 @@ import subprocess
 import os
 import json
 import multiprocessing as mp
+from pathlib import Path
 
 from zelda_level_testing import test_level
 from zelda_pcg_utils import print_to_text, create_random_level
@@ -20,8 +21,6 @@ from zelda_pcg_utils import a_star_path
 # because I forgot to implement everything properly
 # using "import os", lesson learned.
 
-OPERATING_SYSTEM = "Linux"
-# OPERATING_SYSTEM = "Mac"
 
 def random_solution():
     """
@@ -37,7 +36,7 @@ def random_solution():
     width = np.random.randint(3, 10)
     height = np.random.randint(3, 10)
     indicator = min(width, height)
-    placeable_positions = (width - 2)*(height - 2)
+    placeable_positions = (width - 2) * (height - 2)
 
     enemies = np.random.randint(indicator // 2, indicator)
     if indicator > 3:
@@ -50,19 +49,13 @@ def random_solution():
             width += 1
         else:
             height += 1
-        placeable_positions = (width - 2)*(height - 2)
+        placeable_positions = (width - 2) * (height - 2)
 
     for i in range(5):
         try:
-            level = create_random_level(
-                width,
-                height,
-                0,
-                enemies,
-                walls
-            )
+            level = create_random_level(width, height, 0, enemies, walls)
         except ValueError as e:
-            specs = (width,height,0,enemies,walls)
+            specs = (width, height, 0, enemies, walls)
             print(f"Couldn't create level with specifications {specs}.")
             print(f"Got exception {e}.")
             print(f"Attempt {i+1}/5.")
@@ -72,11 +65,13 @@ def random_solution():
         print("Trying again with new random speficifications")
         return random_solution()
 
-    return level.tolist() # Will this work?
+    return level.tolist()  # Will this work?
+
 
 def binary_decision():
     nonce = random.random()
     return nonce <= 0.5
+
 
 def random_variation(x):
     """
@@ -89,8 +84,8 @@ def random_variation(x):
 
     level = np.array(x)
 
-    decider_height = np.random.randint(0,3)
-    decider_width = np.random.randint(0,3)
+    decider_height = np.random.randint(0, 3)
+    decider_width = np.random.randint(0, 3)
 
     if decider_height == 0:
         level = expand(level, axis=0)
@@ -101,7 +96,7 @@ def random_variation(x):
         level = expand(level, axis=1)
     elif decider_width == 1:
         level = shrink(level, axis=1)
-    
+
     enemy_mod = np.random.randint(-2, 3)
     wall_mod = np.random.randint(-2, 3)
 
@@ -117,28 +112,31 @@ def random_variation(x):
 
     return level.tolist()
 
+
 def random_selection(X):
     return random.choice(X)
 
+
 def compute_performance(results):
-    '''
+    """
     This function computes the performance based on
     a piece-wise defined function that favors levels
     that make the agents have 0.6 winrate.
-    '''
-    winratio = sum(results["wins"])/len(results["wins"])
+    """
+    winratio = sum(results["wins"]) / len(results["wins"])
     if winratio <= 0.6:
-        return (5/3)*winratio
+        return (5 / 3) * winratio
     else:
-        return (-6.25)*winratio**2 + 7.5*winratio - 1.25
+        return (-6.25) * winratio ** 2 + 7.5 * winratio - 1.25
+
 
 def compute_features(results, x):
-    '''
+    """
     New features:
         - space coverage: opposite of sparseness.
         - inverse leniency: amount of enemies over total.
         - inverse reachability: length of A* paths.
-    '''
+    """
     features = {}
     level = np.array(x)
 
@@ -164,30 +162,31 @@ def compute_features(results, x):
 
     return features
 
+
 def run_level(path_to_vgdl, path_to_level, agent, record_path, seed, results):
     pid = os.getpid()
 
     # Working from Mac:
-    if OPERATING_SYSTEM == "Mac":
-        dir_to_gvgai = "/Users/migd/Projects/GVGAI/clients/GVGAI-JavaClient/src/compiled_gvgai"
-    elif OPERATING_SYSTEM == "Linux":
-        dir_to_gvgai = "/home/mgd/Projects/GVGAI/clients/GVGAI-JavaClient/src/compiled_gvgai"
-    
+    dir_to_gvgai = "./compiled_gvgai"
+
     os.chdir(dir_to_gvgai)
-    java = subprocess.Popen([
-        "java",
-        "tracks.singlePlayer.Simulate",
-        path_to_vgdl,
-        path_to_level,
-        agent,
-        record_path.replace(".txt", f"_seed_{seed}.txt"),
-        str(seed)
-    ], stdout=subprocess.PIPE)
+    java = subprocess.Popen(
+        [
+            "java",
+            "tracks.singlePlayer.Simulate",
+            path_to_vgdl,
+            path_to_level,
+            agent,
+            record_path.replace(".txt", f"_seed_{seed}.txt"),
+            str(seed),
+        ],
+        stdout=subprocess.PIPE,
+    )
     try:
         results_ = java.stdout.readline().decode("utf8")
         results_ = json.loads(results_)
         results[(pid, seed)] = results_
-        java.kill()    
+        java.kill()
     except json.decoder.JSONDecodeError as e:
         print(f"Couldn't decode the results. {e}")
         java.kill()
@@ -203,7 +202,7 @@ def aggregate_results(experiment_id, x, agent, game, original_seed, results):
         "seeds": [],
         "scores": [],
         "wins": [],
-        "steps": []
+        "steps": [],
     }
     for key, _results in results.items():
         _, seed = key
@@ -214,20 +213,24 @@ def aggregate_results(experiment_id, x, agent, game, original_seed, results):
 
     return agg_results
 
-def simulate_functional(agent, original_seed, comment="", parallel=True, rollouts=1, processors=None):
-    '''
+
+def simulate_functional(
+    agent, original_seed, comment="", parallel=True, rollouts=1, processors=None
+):
+    """
     Returns a function simulate(x) that runs the level x with
     the given agent. For all agents, see the GVGAI implementation
     of Simulate.
-    '''
+    """
+
     def simulate(x):
-        f''' 
+        f"""
         simulate function that runs level x with the agent
         {agent}
         for {rollouts} times in parallel.
-        '''
+        """
 
-        '''
+        """
         This function should take a level description x in the form of
         a list of lists, write it in the proper place, then call the
         subprocess responsible for running the level {rollouts} amount
@@ -235,20 +238,20 @@ def simulate_functional(agent, original_seed, comment="", parallel=True, rollout
         the performance (winratio for now) and the behavioral features
         of the level. Performing the behavioral features is agent-
         independent in most cases, so it could be computed apart.
-        '''
+        """
 
         # Setting up the timestamp id and all paths.
         experiment_id = str(time.time()).replace(".", "_")
         print(f"Running experiment {experiment_id}")
-        if OPERATING_SYSTEM == "Mac":
-            prefix = "/Users/migd"
-        elif OPERATING_SYSTEM == "Linux":
-            prefix = "/home/mgd"
 
-        path_to_vgdl = f"{prefix}/Projects/ITAE_First_Test_paper/code/2020_02_26_experiments/zelda/zelda_experiments/zelda_vgld_desc.txt"
-        path_to_level = f"{prefix}/Projects/ITAE_First_Test_paper/code/2020_02_26_experiments/zelda/zelda_experiments/levels/{experiment_id}_{comment}_level.txt"
-        record_path = f"{prefix}/Projects/ITAE_First_Test_paper/code/2020_02_26_experiments/zelda/zelda_experiments/playtraces/{experiment_id}_{comment}_playtrace.txt"
-        results_path = f"{prefix}/Projects/ITAE_First_Test_paper/code/2020_02_26_experiments/zelda/zelda_experiments/results/{experiment_id}_{comment}_results.json"
+        file_path = Path(__file__).parent.resolve()
+
+        path_to_vgdl = f"{file_path}/zelda_experiments/zelda_vgld_desc.txt"
+        path_to_level = (
+            f"{file_path}/zelda_experiments/levels/{experiment_id}_{comment}_level.txt"
+        )
+        record_path = f"{file_path}/zelda_experiments/playtraces/{experiment_id}_{comment}_playtrace.txt"
+        results_path = f"{file_path}/zelda_experiments/results/{experiment_id}_{comment}_results.json"
 
         # Writing the level.
         level_text = print_to_text(x, path_to_level)
@@ -269,8 +272,8 @@ def simulate_functional(agent, original_seed, comment="", parallel=True, rollout
             with mp.Manager() as manager:
                 results = manager.dict()
                 arguments = [
-                    (path_to_vgdl, path_to_level, agent,
-                     record_path, seed, results) for seed in seeds
+                    (path_to_vgdl, path_to_level, agent, record_path, seed, results)
+                    for seed in seeds
                 ]
                 with manager.Pool(processors) as pool:
                     pool.starmap(run_level, arguments)
@@ -279,28 +282,25 @@ def simulate_functional(agent, original_seed, comment="", parallel=True, rollout
             results = {}
             for seed in seeds:
                 run_level(
-                    path_to_vgdl,
-                    path_to_level,
-                    agent,
-                    record_path,
-                    seed,
-                    results
+                    path_to_vgdl, path_to_level, agent, record_path, seed, results
                 )
-        
-        results = aggregate_results(experiment_id, x, agent, "zelda", original_seed, results)
+
+        results = aggregate_results(
+            experiment_id, x, agent, "zelda", original_seed, results
+        )
         # print(results)
 
         with open(results_path, "w") as fp:
             json.dump(results, fp)
 
-        features = compute_features(results, x) # or path to level? TODO.
+        features = compute_features(results, x)  # or path to level? TODO.
         performance = compute_performance(results)
 
         metadata = {
             "experiment_id": experiment_id,
             "scores": results["scores"],
             "wins": results["wins"],
-            "steps": results["steps"]
+            "steps": results["steps"],
         }
         return performance, features, metadata
 

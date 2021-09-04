@@ -1,0 +1,5 @@
+__pycache__/
+.DS_Store
+zelda_experiments/levels/
+zelda_experiments/playtraces/
+zelda_experiments/results/
