@@ -3,3 +3,4 @@ __pycache__/
 zelda_experiments/levels/
 zelda_experiments/playtraces/
 zelda_experiments/results/
+zelda_experiments/generations/
