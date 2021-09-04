@@ -22,7 +22,3 @@ There are two `.sh` files that should be enough for replicating the results of t
 
 1. Run `to_run.sh` for the MAP-Elites prior creation. Then create a new folder `./zelda_experiment/generations` and put the final generations of all agents.
 2. After that, you should be able to run `to_run_itae.sh`.
-
-## Citing the paper
-
-Feel free to cite the paper
