@@ -9,5 +9,6 @@ for level_id in range(100):
             break
         except ValueError:
             pass
-    save_level_from_array(level, f"./zelda_experiments/random_levels_viz/level_{level_id}.jpg")
-    
+    save_level_from_array(
+        level, f"./zelda_experiments/random_levels_viz/level_{level_id}.jpg"
+    )

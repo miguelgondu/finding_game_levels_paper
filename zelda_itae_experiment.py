@@ -1,6 +1,6 @@
-'''
+"""
 This script contains the experiment of adapting one agent to another one's map.
-'''
+"""
 
 import glob
 import click
@@ -12,6 +12,7 @@ import os
 time = datetime.datetime.now()
 timestamp = time.strftime("%Y_%m_%d_%Hh_%Mm_%Ss")
 
+
 def deploy_functional(agent, seed, comment, parallel, rollouts, processors):
     simulate = simulate_functional(agent, seed, comment, parallel, rollouts, processors)
 
@@ -20,6 +21,7 @@ def deploy_functional(agent, seed, comment, parallel, rollouts, processors):
         return performance, behavior, metadata
 
     return deploy
+
 
 @click.command()
 @click.argument("path", type=str)
@@ -34,9 +36,22 @@ def deploy_functional(agent, seed, comment, parallel, rollouts, processors):
 @click.option("--prior_folder", type=str, default=f"itae_updates_{timestamp}")
 @click.option("--agent", type=str, default=None)
 @click.option("--parallel/--no-parallel", default=True)
-def experiment(path, iterations, rollouts, processors, performance_bound, seed, updates, comment, path_to_updates, prior_folder, agent, parallel):
+def experiment(
+    path,
+    iterations,
+    rollouts,
+    processors,
+    performance_bound,
+    seed,
+    updates,
+    comment,
+    path_to_updates,
+    prior_folder,
+    agent,
+    parallel,
+):
     # Make sure that the folders exist
-    path_to_prior_folder = f"{path_to_updates}/{prior_folder}" 
+    path_to_prior_folder = f"{path_to_updates}/{prior_folder}"
     if not os.path.exists(path_to_prior_folder):
         os.makedirs(path_to_prior_folder)
 
@@ -53,10 +68,11 @@ def experiment(path, iterations, rollouts, processors, performance_bound, seed, 
             comment=f"{comment}_iteration_{iteration}_",
             max_iterations=updates,
             path_to_updates=path_to_agent_subfolder,
-            performance_bound=performance_bound
+            performance_bound=performance_bound,
         )
         itae.run()
         seed += 1
 
+
 if __name__ == "__main__":
-    experiment() # pylint: disable=no-value-for-parameter
+    experiment()  # pylint: disable=no-value-for-parameter

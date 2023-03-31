@@ -30,7 +30,7 @@ for prior in priors:
         final_table[prior][agent] = {
             "updates": [],
             "successful": [],
-            "performances": []
+            "performances": [],
         }
         path_to_agent = f"{path_to_prior}/{agent}"
         path_to_agent = f"{path_to_prior}/{agent}"
@@ -45,11 +45,7 @@ for prior in priors:
                 update_iterations[prefix] = []
             update_iterations[prefix].append(postfix)
 
-        result = {
-            "prior": prior,
-            "agent": agent,
-            "iterations": {}
-        }
+        result = {"prior": prior, "agent": agent, "iterations": {}}
         best_level = None
         best_performance = None
 
@@ -68,9 +64,11 @@ for prior in priors:
             table[prior][agent].append(len(updates))
             final_table[prior][agent]["updates"].append(len(updates))
             best_performance_in_iteration = None
-            
+
             for update_path in updates:
-                update_metadata_path = update_path.replace("update_", "update_metadata_")
+                update_metadata_path = update_path.replace(
+                    "update_", "update_metadata_"
+                )
                 with open(update_metadata_path) as fp:
                     update_metadata = json.load(fp)
 
@@ -82,9 +80,9 @@ for prior in priors:
                 scores = update_metadata["metadata"]["scores"]
                 steps = update_metadata["metadata"]["steps"]
 
-                winrate = sum(wins)/len(wins)
-                mean_score = sum(scores)/len(scores)
-                mean_steps = sum(steps)/len(steps)
+                winrate = sum(wins) / len(wins)
+                mean_score = sum(scores) / len(scores)
+                mean_steps = sum(steps) / len(steps)
 
                 iteration_results["centroids"].append(centroid)
                 iteration_results["levels"].append(level)
@@ -97,17 +95,27 @@ for prior in priors:
                     # Update best performance and level
                     best_performance = performance
                     best_level = level
-                
-                if not best_performance_in_iteration or best_performance_in_iteration < performance:
+
+                if (
+                    not best_performance_in_iteration
+                    or best_performance_in_iteration < performance
+                ):
                     best_performance_in_iteration = performance
 
             result["iterations"][prefix] = iteration_results
-            final_table[prior][agent]["successful"].append(best_performance_in_iteration >= 0.75)
-            final_table[prior][agent]["performances"].append(best_performance_in_iteration)
+            final_table[prior][agent]["successful"].append(
+                best_performance_in_iteration >= 0.75
+            )
+            final_table[prior][agent]["performances"].append(
+                best_performance_in_iteration
+            )
         result["best_performance"] = best_performance
         result["best_level"] = best_level
 
-        with open(f"./zelda_experiments/postprocessed_updates/using_{prior}_agent_{agent}.json", "w") as fp:
+        with open(
+            f"./zelda_experiments/postprocessed_updates/using_{prior}_agent_{agent}.json",
+            "w",
+        ) as fp:
             json.dump(result, fp)
 
 print(table)
@@ -129,13 +137,15 @@ priors = {
     "sampleonesteplookahead_prior": "OSLA",
     "sampleRandom_prior": "Random",
     "doNothing_prior": "doNothing",
-    "baselineRandomPrior_prior": "Baseline (noise)"
+    "baselineRandomPrior_prior": "Baseline (noise)",
 }
 
-inv_priors = {v: k for k,v in priors.items()}
+inv_priors = {v: k for k, v in priors.items()}
 
 agents = {
-    k.replace("_prior", ""): v for k,v in priors.items() if "baseline" not in k and "doNothing" not in k
+    k.replace("_prior", ""): v
+    for k, v in priors.items()
+    if "baseline" not in k and "doNothing" not in k
 }
 inv_agents = {v: k for k, v in agents.items()}
 
@@ -148,7 +158,7 @@ for prior, values in final_table.items():
         updates = np.array(values[agent]["updates"])
         successful = values[agent]["successful"]
         performances = values[agent]["performances"]
-        print("-"*80)
+        print("-" * 80)
         print(f"Prior: {prior}")
         print(f"Agent: {agent}")
         print(f"updates: {updates}")
@@ -159,13 +169,19 @@ for prior, values in final_table.items():
         else:
             filtered_updates = updates[successful]
             print(f"filtered updates: {filtered_updates}")
-            new_row[agent_name] = f"{np.mean(filtered_updates):.1f} ({len(filtered_updates)}/{len(updates)})"
+            new_row[
+                agent_name
+            ] = f"{np.mean(filtered_updates):.1f} ({len(filtered_updates)}/{len(updates)})"
     df.loc[priors[prior]] = new_row
 df.index.name = "Prior\\Agent"
 print(df)
-with open("./zelda_experiments/final_tables/mean_update_iterations_final.csv", "w") as fp:
+with open(
+    "./zelda_experiments/final_tables/mean_update_iterations_final.csv", "w"
+) as fp:
     fp.write(df.to_csv())
-with open("./zelda_experiments/final_tables/mean_update_iterations_final_tex.txt", "w") as fp:
+with open(
+    "./zelda_experiments/final_tables/mean_update_iterations_final_tex.txt", "w"
+) as fp:
     fp.write(df.to_latex())
 
 
@@ -175,7 +191,7 @@ for prior, values in table.items():
     for agent, agent_name in agents.items():
         if agent not in values:
             print(f"{agent} is not in {values.keys()}")
-        mean_updates = sum(values[agent])/len(values[agent])
+        mean_updates = sum(values[agent]) / len(values[agent])
         new_row[agent_name] = mean_updates
     df.loc[priors[prior]] = new_row
 df.index.name = "Prior\\Agent"
@@ -198,10 +214,12 @@ df_variance.index.name = "Prior\\Agent"
 print(df_variance)
 with open("./zelda_experiments/final_tables/variance_update_iterations.csv", "w") as fp:
     fp.write(df_variance.to_csv())
-with open("./zelda_experiments/final_tables/variance_update_iterations_tex.txt", "w") as fp:
+with open(
+    "./zelda_experiments/final_tables/variance_update_iterations_tex.txt", "w"
+) as fp:
     fp.write(df_variance.to_latex(float_format=lambda x: f"{x:.2f}"))
 
-# # Saving the tables with performances 
+# # Saving the tables with performances
 
 df_perf = pd.DataFrame(index=priors.values(), columns=agents.values())
 df_perf_var = pd.DataFrame(index=priors.values(), columns=agents.values())
@@ -222,14 +240,20 @@ print(df_perf)
 print(df_perf_var)
 with open("./zelda_experiments/final_tables/mean_update_performances.csv", "w") as fp:
     fp.write(df_perf.to_csv())
-with open("./zelda_experiments/final_tables/mean_update_performances_tex.txt", "w") as fp:
+with open(
+    "./zelda_experiments/final_tables/mean_update_performances_tex.txt", "w"
+) as fp:
     fp.write(df_perf.to_latex(float_format=lambda x: f"{x:.2f}"))
-with open("./zelda_experiments/final_tables/variance_update_performances.csv", "w") as fp:
+with open(
+    "./zelda_experiments/final_tables/variance_update_performances.csv", "w"
+) as fp:
     fp.write(df_perf_var.to_csv())
-with open("./zelda_experiments/final_tables/variance_update_performances_tex.txt", "w") as fp:
+with open(
+    "./zelda_experiments/final_tables/variance_update_performances_tex.txt", "w"
+) as fp:
     fp.write(df_perf_var.to_latex(float_format=lambda x: f"{x:.2f}"))
 
-# # Saving the table with deviations of performances 
+# # Saving the table with deviations of performances
 
 # keys = list(table.keys())
 # df_perf_var = pd.DataFrame(index=keys, columns=[k.replace("_prior", "") for k in keys])

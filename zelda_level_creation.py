@@ -8,9 +8,11 @@ import numpy as np
 import json
 import os
 import gym
+
 # import gym_gvgai
 import matplotlib.pyplot as plt
 from zelda_pcg_utils import create_random_level, print_to_text
+
 
 def create_level(width=None, height=None, loot=None, enemies=None, walls=None):
     """
@@ -45,24 +47,16 @@ def create_level(width=None, height=None, loot=None, enemies=None, walls=None):
     level = create_random_level(width, height, loot, enemies, walls)
 
     path = f"../outputs/levels/{str(timestamp).replace('.', '_')}_dungeon_level_random_agent.json"
-    
+
     level_text = print_to_text(level)
     print(level_text)
-    document = {
-        "timestamp": timestamp,
-        "seed": seed,
-        "txt": level_text
-    }
+    document = {"timestamp": timestamp, "seed": seed, "txt": level_text}
 
     with open(path, "w") as f:
-        json.dump(
-            document,
-            f,
-            separators=[",", ":"],
-            indent=4
-        )
+        json.dump(document, f, separators=[",", ":"], indent=4)
 
     return document
+
 
 def register_level(level, game="zelda", lvl="1", path_to_games=None):
     """
@@ -81,15 +75,19 @@ def register_level(level, game="zelda", lvl="1", path_to_games=None):
         fp.write(level)
 
     # Register that level in particular (?)
-    env_id = f'gvgai-zelda-lvl{lvl}-v1'
+    env_id = f"gvgai-zelda-lvl{lvl}-v1"
     try:
         gym.register(
-        id=env_id,
-        entry_point='gym_gvgai.envs.gvgai_env:GVGAI_Env',
-        kwargs={'game': "zelda", 'level': int(lvl), 'version': 1},    #'obs_type': obs_type
-        max_episode_steps=2000
-        #nondeterministic=nondeterministic,
-        # Play with different setups here
+            id=env_id,
+            entry_point="gym_gvgai.envs.gvgai_env:GVGAI_Env",
+            kwargs={
+                "game": "zelda",
+                "level": int(lvl),
+                "version": 1,
+            },  #'obs_type': obs_type
+            max_episode_steps=2000
+            # nondeterministic=nondeterministic,
+            # Play with different setups here
         )
     except gym.error.Error:
         print(f"Couldn't register env {env_id}. Was it registered before?")

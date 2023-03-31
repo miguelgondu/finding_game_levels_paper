@@ -10,6 +10,7 @@ from pathlib import Path
 
 from visualization_utils import save_level_from_array
 
+
 def compute_winrate_performance(generation, key_x, key_y):
     point_winrate_performance = {}
     for k, doc in generation.items():
@@ -28,24 +29,26 @@ def compute_winrate_performance(generation, key_x, key_y):
                 # centroid was built in alphabetical order.
                 index_x, index_y = keys.index(key_x), keys.index(key_y)
             else:
-                raise RuntimeError(f"Features is of unexpected type {type(doc['features'])}")
+                raise RuntimeError(
+                    f"Features is of unexpected type {type(doc['features'])}"
+                )
 
             point = (doc["centroid"][index_x], doc["centroid"][index_y])
-            winrate = sum(doc["metadata"]["wins"])/len(doc["metadata"]["wins"])
+            winrate = sum(doc["metadata"]["wins"]) / len(doc["metadata"]["wins"])
 
             if point not in point_winrate_performance:
                 point_winrate_performance[point] = (winrate, doc["performance"])
 
             if point_winrate_performance[point][1] < doc["performance"]:
                 point_winrate_performance[point] = (winrate, doc["performance"])
-    
+
     return point_winrate_performance
 
 
 def plot_winrate(ax, generation, partition, vmin=0, vmax=1, title=""):
-    '''
+    """
     This function plots the winrate in an axis according to a partition.
-    '''
+    """
     partition_items = list(partition.items())
     partition_items.sort(key=itemgetter(0))
 
@@ -56,7 +59,7 @@ def plot_winrate(ax, generation, partition, vmin=0, vmax=1, title=""):
 
     # Computing the point_winrate_performance dict
     point_winrate_performance = compute_winrate_performance(generation, key_x, key_y)
-    
+
     # Computing the points and the colors
     points = []
     winrates = []
@@ -67,7 +70,9 @@ def plot_winrate(ax, generation, partition, vmin=0, vmax=1, title=""):
     points = np.array(points)
     winrates = np.array(winrates)
 
-    scatter = ax.scatter(points[:, 0], points[:, 1], c=winrates, vmin=vmin, vmax=vmax, s=500, marker="s")
+    scatter = ax.scatter(
+        points[:, 0], points[:, 1], c=winrates, vmin=vmin, vmax=vmax, s=500, marker="s"
+    )
     ax.set_xlim(xlims)
     ax.set_ylim(ylims)
     plt.colorbar(scatter, ax=ax)
@@ -77,10 +82,11 @@ def plot_winrate(ax, generation, partition, vmin=0, vmax=1, title=""):
         ax.set_ylabel(partition_items[1][0])
     ax.set_title("Winrates" + title)
 
+
 def plot_performance(ax, generation, partition, vmin=0, vmax=1):
-    '''
+    """
     This function plots the winrate in an axis according to a partition.
-    '''
+    """
     partition_items = list(partition.items())
     partition_items.sort(key=itemgetter(0))
 
@@ -91,7 +97,7 @@ def plot_performance(ax, generation, partition, vmin=0, vmax=1):
 
     # Computing the point_winrate_performance dict
     point_winrate_performance = compute_winrate_performance(generation, key_x, key_y)
-    
+
     # Computing the points and the colors
     points = []
     performances = []
@@ -102,7 +108,9 @@ def plot_performance(ax, generation, partition, vmin=0, vmax=1):
     points = np.array(points)
     performances = np.array(performances)
 
-    scatter = ax.scatter(points[:, 0], points[:, 1], c=performances, vmin=vmin, vmax=vmax, s=500)
+    scatter = ax.scatter(
+        points[:, 0], points[:, 1], c=performances, vmin=vmin, vmax=vmax, s=500
+    )
     ax.set_xlim(xlims)
     ax.set_ylim(ylims)
     plt.colorbar(scatter, ax=ax)
@@ -112,34 +120,37 @@ def plot_performance(ax, generation, partition, vmin=0, vmax=1):
         ax.set_ylabel(partition_items[1][0])
     ax.set_title("Performance")
 
+
 def get_best_performers(generation):
     best_performers = []
     for doc in generation.values():
         if doc["performance"] == 1:
             best_performers.append(doc)
-    
+
     return best_performers
 
+
 def get_levels_for_winrate(generation, lower, upper):
-    """ Returns the cells that had a winrate between lower and upper"""
+    """Returns the cells that had a winrate between lower and upper"""
     docs = []
     for doc in generation.values():
         if doc["performance"] is not None:
             wins = doc["metadata"]["wins"]
-            winrate = sum(wins)/len(wins)
+            winrate = sum(wins) / len(wins)
             if lower <= winrate < upper:
                 docs.append(doc)
-    
+
     return docs
 
+
 def process_generation(filepath, experiment_name, all_partitions):
-    '''
+    """
     This function grabs a filepath to a generation.json file
     and process it. By processing it I mean:
     1. Extracting the best performing behaviors, and plotting their levels.
     2. Getting a winratio map for all combinations of features.
     3. Extracting the levels that were easy, medium and hard.
-    '''
+    """
     with open(filepath) as fp:
         generation = json.load(fp)
 
@@ -159,7 +170,7 @@ def process_generation(filepath, experiment_name, all_partitions):
     path_results = f"{path_summary}/best_levels_results"
     if not os.path.exists(path_results):
         os.makedirs(path_results)
-    
+
     path_winrates = f"{path_summary}/winrates"
     if not os.path.exists(path_winrates):
         os.makedirs(path_winrates)
@@ -175,7 +186,7 @@ def process_generation(filepath, experiment_name, all_partitions):
     path_hard = f"{path_summary}/hard_levels"
     if not os.path.exists(path_hard):
         os.makedirs(path_hard)
-    
+
     # Plotting the best performing levels and
     # saving the best performing results.
     best_performers = get_best_performers(generation)
@@ -184,7 +195,7 @@ def process_generation(filepath, experiment_name, all_partitions):
         level = np.array(doc["solution"])
         experiment_id = doc["metadata"]["experiment_id"]
         save_level_from_array(level, f"{path_level_images}/{experiment_id}.jpg")
-        
+
         # Save the best performing results.
         with open(f"{path_results}/{experiment_id}.json", "w") as fp:
             json.dump(doc["metadata"], fp)
@@ -196,20 +207,22 @@ def process_generation(filepath, experiment_name, all_partitions):
         feature_1, feature_2 = combination
         partition = {
             feature_1: all_partitions[feature_1],
-            feature_2: all_partitions[feature_2]
+            feature_2: all_partitions[feature_2],
         }
 
         # Plotting winrate
-        _, ax = plt.subplots(1, 1, figsize=(10,10))
+        _, ax = plt.subplots(1, 1, figsize=(10, 10))
         plot_winrate(ax, generation, partition, title=experiment_name)
-        plt.savefig(f"{path_winrates}/{feature_1.replace(' ', '_')}_{feature_2.replace(' ', '_')}.jpg")
+        plt.savefig(
+            f"{path_winrates}/{feature_1.replace(' ', '_')}_{feature_2.replace(' ', '_')}.jpg"
+        )
         plt.close()
-    
+
     # Storing the easy, medium and hard levels
     difficulties = {
         path_easy: get_levels_for_winrate(generation, 0.8, 1.1),
         path_medium: get_levels_for_winrate(generation, 0.4, 0.8),
-        path_hard: get_levels_for_winrate(generation, -0.1, 0.4)
+        path_hard: get_levels_for_winrate(generation, -0.1, 0.4),
     }
 
     for path, docs in difficulties.items():
@@ -218,12 +231,11 @@ def process_generation(filepath, experiment_name, all_partitions):
             level = np.array(doc["solution"])
             experiment_id = doc["metadata"]["experiment_id"]
             wins = doc["metadata"]["wins"]
-            winrate = sum(wins)/len(wins)
+            winrate = sum(wins) / len(wins)
             save_level_from_array(
-                level,
-                f"{path}/{experiment_id}.jpg",
-                title=f"Winrate: {winrate}"
+                level, f"{path}/{experiment_id}.jpg", title=f"Winrate: {winrate}"
             )
+
 
 # @click.command()
 # @click.argument("filepath", type=str)
@@ -244,11 +256,12 @@ def main():
     all_partitions = {
         "space coverage": [0.3, 1],
         "leniency": [-0.5, 11],
-        "reachability": [3.5, 16.5]
+        "reachability": [3.5, 16.5],
     }
     for path_, name in experiments.items():
         print(f"Processing: {name}")
         process_generation(path_, name, all_partitions)
+
 
 if __name__ == "__main__":
     main()

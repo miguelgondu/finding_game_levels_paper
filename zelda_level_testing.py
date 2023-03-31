@@ -17,6 +17,7 @@ import json
 import os
 import random
 
+
 def show_state(env, step):
     # plt.figure()
     plt.show()
@@ -29,6 +30,7 @@ def show_state(env, step):
     # display.clear_output(wait=True)
     # display.display(plt.gcf())
 
+
 def plot_level_and_save(env, filename, title=None):
     plt.figure()
     if title:
@@ -37,6 +39,7 @@ def plot_level_and_save(env, filename, title=None):
     plt.axis("off")
     plt.savefig(filename)
     plt.close()
+
 
 def rollout(agent, env_id, results, max_frames, lvl, id_, show):
     """
@@ -82,7 +85,9 @@ def rollout(agent, env_id, results, max_frames, lvl, id_, show):
             elif debug["winner"] == "NO_WINNER":
                 temp_results["wins"].append(False)
             else:
-                raise ValueError(f"Unknown state {debug['winner']}, is there something else besides winning or losing?")
+                raise ValueError(
+                    f"Unknown state {debug['winner']}, is there something else besides winning or losing?"
+                )
             print(f"Game over at tick {i}, result: {temp_results['wins'][-1]}")
             break
     else:
@@ -93,6 +98,7 @@ def rollout(agent, env_id, results, max_frames, lvl, id_, show):
     results[pid] = temp_results
     env.close()
 
+
 def aggregate_results(pool_results):
     final_results = {"scores": [], "steps": [], "wins": []}
     for results in pool_results.values():
@@ -102,11 +108,21 @@ def aggregate_results(pool_results):
 
     return final_results
 
-def test_level(agent, level, rollouts=1, max_frames=2000, save_playtraces=False, lvl="1", parallel=True, show=False):
-    '''
+
+def test_level(
+    agent,
+    level,
+    rollouts=1,
+    max_frames=2000,
+    save_playtraces=False,
+    lvl="1",
+    parallel=True,
+    show=False,
+):
+    """
     This is the function that tests an agent in a level, doing a certain
     amount of rollouts.
-    '''
+    """
     # create a doc for saving the info
     level_txt = print_to_text(level)
     doc = {
@@ -139,7 +155,12 @@ def test_level(agent, level, rollouts=1, max_frames=2000, save_playtraces=False,
         with mp.Manager() as manager:
             results = manager.dict()
             with manager.Pool() as pool:
-                pool.starmap(rollout, repeat((agent, env_id, results, max_frames, lvl, id_, show), rollouts))
+                pool.starmap(
+                    rollout,
+                    repeat(
+                        (agent, env_id, results, max_frames, lvl, id_, show), rollouts
+                    ),
+                )
 
             print(results)
             print(dict(results))
@@ -150,23 +171,16 @@ def test_level(agent, level, rollouts=1, max_frames=2000, save_playtraces=False,
             rollout(agent, env_id, results, max_frames, lvl, id_, show)
 
     final_results = aggregate_results(results)
-    doc = {
-        **doc,
-        **final_results
-    }
+    doc = {**doc, **final_results}
 
     # print(doc)
 
     # Saving doc
     with open(f"../outputs/random_agent_results/{id_}_results.json", "w") as fp:
-        json.dump(
-            doc,
-            fp,
-            indent=2,
-            separators=[",", ":"]
-        )
+        json.dump(doc, fp, indent=2, separators=[",", ":"])
 
     return doc
+
 
 if __name__ == "__main__":
     pass

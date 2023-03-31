@@ -38,7 +38,7 @@ def write_sh(generations, iterations, initial_iterations, rollouts, seed, proces
         command += f"--rollouts={rollouts} "
         command += f"--agent={agent} "
 
-        comment = agent.split(".")[-2] # agent name
+        comment = agent.split(".")[-2]  # agent name
         comment += f"_{timestamp}"
         comment += f"_{generations}_gens"
         comment += f"_{iterations}_iter"
@@ -56,6 +56,7 @@ def write_sh(generations, iterations, initial_iterations, rollouts, seed, proces
 
     with open(f"to_run_{timestamp}.sh", "w") as fp:
         fp.write(script)
+
 
 if __name__ == "__main__":
     write_sh()

@@ -9,13 +9,24 @@ and at most 20 updates.
 import datetime
 import click
 
-# def experiment(path, rollouts, processors, seed, comment, path_to_updates, agent, parallel):
 
-def write_command(prior_file, agent, iterations, rollouts, processors, performance_bound, seed, updates, comment, path_to_updates, parallel):
+def write_command(
+    prior_file,
+    agent,
+    iterations,
+    rollouts,
+    processors,
+    performance_bound,
+    seed,
+    updates,
+    comment,
+    path_to_updates,
+    parallel,
+):
     prior_agent = prior_file.split("/")[-1].split("_")[1]
     agent_name = agent.split(".")[-2]
 
-    new_comment = comment + '_prior_' + prior_agent + '_to_' + agent_name
+    new_comment = comment + "_prior_" + prior_agent + "_to_" + agent_name
     command = "python zelda_itae_experiment.py "
     command += f"{prior_file} "
     command += f"--iterations={iterations} "
@@ -34,6 +45,7 @@ def write_command(prior_file, agent, iterations, rollouts, processors, performan
         command += "--no-parallel"
     return command + f" > log_prior_{prior_agent}_agent_{agent_name}.txt"
 
+
 @click.command()
 @click.option("--iterations", type=int, default=1)
 @click.option("--rollouts", type=int, default=5)
@@ -44,7 +56,17 @@ def write_command(prior_file, agent, iterations, rollouts, processors, performan
 @click.option("--comment", type=str, default=None)
 @click.option("--path_to_updates", type=str, default=".")
 @click.option("--parallel/--no-parallel", default=True)
-def write_sh(iterations, rollouts, processors, performance_bound, seed, updates, comment, path_to_updates, parallel):
+def write_sh(
+    iterations,
+    rollouts,
+    processors,
+    performance_bound,
+    seed,
+    updates,
+    comment,
+    path_to_updates,
+    parallel,
+):
     time = datetime.datetime.now()
     timestamp = time.strftime("%Y_%m_%d_%Hh_%Mm_%Ss")
 
@@ -57,7 +79,7 @@ def write_sh(iterations, rollouts, processors, performance_bound, seed, updates,
         "updates": updates,
         "comment": f"{timestamp}_" + comment,
         "path_to_updates": path_to_updates,
-        "parallel": parallel
+        "parallel": parallel,
     }
 
     prior_files = {
@@ -71,12 +93,14 @@ def write_sh(iterations, rollouts, processors, performance_bound, seed, updates,
         "tracks.singlePlayer.simple.doNothing.Agent": "./zelda_experiments/generations/generation_doNothing_2020_03_12_20h_10_gens_50_iter_100_init_40_roll_23_seed_00009.json",
     }
 
-    baseline_prior_file ="./zelda_experiments/generations/generation_baselineRandomPrior_00009.json"
+    baseline_prior_file = (
+        "./zelda_experiments/generations/generation_baselineRandomPrior_00009.json"
+    )
     priors = [baseline_prior_file] + list(prior_files.values())
     script = ""
     for prior_file in priors:
         prior_name = prior_file.split("/")[-1].split("_")[1]
-        script += "# " + "-"*80 + "\n"
+        script += "# " + "-" * 80 + "\n"
         script += f"# prior: {prior_name}" + "\n"
         for agent in prior_files.keys():
             if "doNothing" in agent:
@@ -86,6 +110,7 @@ def write_sh(iterations, rollouts, processors, performance_bound, seed, updates,
 
     with open(f"./to_run_itae_{timestamp}.sh", "w") as fp:
         fp.write(script)
-    
+
+
 if __name__ == "__main__":
-    write_sh() # pylint: disable=no-value-for-parameter
+    write_sh()  # pylint: disable=no-value-for-parameter

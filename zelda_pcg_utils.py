@@ -24,10 +24,12 @@ KEY = "+"
 # np.random.seed(seed)
 # random.seed(seed)
 
+
 def create_empty_level(width, height):
     level = np.zeros((width, height), dtype=str)
     level[level == ""] = EMPTY
     return level
+
 
 def place_edge_walls(level):
     height, width = level.shape
@@ -35,6 +37,7 @@ def place_edge_walls(level):
     level[:, 0] = WALL
     level[height - 1, :] = WALL
     level[:, width - 1] = WALL
+
 
 def get_placeable_positions(level):
     height, width = level.shape
@@ -46,7 +49,10 @@ def get_placeable_positions(level):
 
     return placeable_positions
 
-def position_object(level, object_string, placeable_positions=None, ideal_position=None):
+
+def position_object(
+    level, object_string, placeable_positions=None, ideal_position=None
+):
     """
     This function takes a level (a numpy array) and places the object at random.
     It also takes an optional parameter called ideal_position to force the algorithm
@@ -61,16 +67,21 @@ def position_object(level, object_string, placeable_positions=None, ideal_positi
             return
 
     if placeable_positions == set([]):
-        raise ValueError(f"There are no placeable positions for object {object_string} in {level}")
+        raise ValueError(
+            f"There are no placeable positions for object {object_string} in {level}"
+        )
 
     if placeable_positions is None:
         placeable_positions = get_placeable_positions(level)
         if not placeable_positions:
-            raise ValueError(f"The level has no placeable positions for the object {object_string}: {level}")
+            raise ValueError(
+                f"The level has no placeable positions for the object {object_string}: {level}"
+            )
 
     obj_position = random.choice(list(placeable_positions))
     placeable_positions.remove(obj_position)
     level[obj_position] = object_string
+
 
 def get_neighbors(level, position):
     height, width = level.shape
@@ -81,42 +92,49 @@ def get_neighbors(level, position):
 
     if y < 0 or y >= width:
         raise ValueError(f"Position is out of bounds in x: {position}")
-    
+
     neighbors = []
 
     if x - 1 > 0:
         neighbors.append((x - 1, y))
-    
+
     if x + 1 < height:
         neighbors.append((x + 1, y))
-    
+
     if y - 1 > 0:
         neighbors.append((x, y - 1))
-    
+
     if y + 1 < width:
         neighbors.append((x, y + 1))
 
     random.shuffle(neighbors)
     return neighbors
 
+
 def get_neighbor_objs(level, node, obj):
     neighbors = get_neighbors(level, node)
     return set([(position, level[position]) for position in neighbors])
+
 
 def get_positions(level, obj):
     positions = np.where(level == obj)
     return [(x, y) for x, y in zip(positions[0], positions[1])]
 
+
 def find_path(level, obj_1=AVATAR, obj_2=GOAL):
     parents = {}
     position_obj_1 = get_positions(level, obj_1)
     position_obj_2 = get_positions(level, obj_2)
-    
+
     if len(position_obj_1) > 1:
-        raise ValueError(f"Objects should appear only once, and {obj_1} appears {len(position_obj_1)} times")
-    
+        raise ValueError(
+            f"Objects should appear only once, and {obj_1} appears {len(position_obj_1)} times"
+        )
+
     if len(position_obj_2) > 1:
-        raise ValueError(f"Objects should appear only once, and {obj_2} appears {len(position_obj_2)} times")
+        raise ValueError(
+            f"Objects should appear only once, and {obj_2} appears {len(position_obj_2)} times"
+        )
 
     position_obj_1 = position_obj_1[0]
     position_obj_2 = position_obj_2[0]
@@ -150,13 +168,15 @@ def find_path(level, obj_1=AVATAR, obj_2=GOAL):
 
             if level[neighbor] != WALL:
                 stack.put(neighbor)
-    
+
     raise ValueError(f"Object {obj_1} and {obj_2} are not connected in the level.")
+
 
 def euclidean_distance(point_1, point_2):
     p1 = np.array(point_1)
     p2 = np.array(point_2)
     return np.sum((p1 - p2) ** 2)
+
 
 def _reconstruct_path(came_from, root, goal):
     path = []
@@ -166,16 +186,21 @@ def _reconstruct_path(came_from, root, goal):
         current = came_from[current]
     return path[::-1]
 
+
 def a_star_path(level, root_text=AVATAR, goal_text=KEY):
     parents = {}
     positions_root = get_positions(level, root_text)
     positions_goal = get_positions(level, goal_text)
 
     if len(positions_root) > 1:
-        raise AssertionError(f"Objects should appear only once, and {root_text} appears {len(positions_root)} times")
+        raise AssertionError(
+            f"Objects should appear only once, and {root_text} appears {len(positions_root)} times"
+        )
 
     if len(positions_goal) > 1:
-        raise AssertionError(f"Objects should appear only once, and {goal_text} appears {len(positions_goal)} times")
+        raise AssertionError(
+            f"Objects should appear only once, and {goal_text} appears {len(positions_goal)} times"
+        )
 
     root = positions_root[0]
     goal = positions_goal[0]
@@ -214,7 +239,9 @@ def a_star_path(level, root_text=AVATAR, goal_text=KEY):
                     heap.put((g[neighbor] + h(neighbor), neighbor))
                     visited.add(neighbor)
 
-    raise ValueError(f"Objects {root_text} and {goal_text} are disconnected in the level.")
+    raise ValueError(
+        f"Objects {root_text} and {goal_text} are disconnected in the level."
+    )
 
 
 def create_random_level(width, height, loot, enemies, walls, draw_path=False):
@@ -228,7 +255,9 @@ def create_random_level(width, height, loot, enemies, walls, draw_path=False):
     position_object(level, KEY, placeable_positions=placeable_positions)
     path_to_key = find_path(level, AVATAR, KEY)
 
-    position_object(level, GOAL, placeable_positions=placeable_positions - set(path_to_key.keys()))
+    position_object(
+        level, GOAL, placeable_positions=placeable_positions - set(path_to_key.keys())
+    )
     path_to_goal = find_path(level, KEY, GOAL)
     nodes_path = set(path_to_key.keys()).union(set(path_to_goal.keys()))
 
@@ -253,6 +282,7 @@ def create_random_level(width, height, loot, enemies, walls, draw_path=False):
 
     return level
 
+
 def print_to_text(level, path=None):
     # TODO: this might have to be changed after putting everything
     # in Zelda's VGDL.
@@ -274,8 +304,9 @@ def print_to_text(level, path=None):
     if path:
         with open(path, "w") as f:
             f.write(text)
-    
+
     return text
+
 
 def scramble_prompt(level, prompt, scrambles=1):
     """
@@ -294,12 +325,15 @@ def scramble_prompt(level, prompt, scrambles=1):
     level[old_pos] = EMPTY
     level[new_pos] = prompt
 
+
 # New variations
+
 
 def get_path_positions(level):
     path_to_key = a_star_path(level, root_text=AVATAR, goal_text=KEY)
     path_to_goal = a_star_path(level, root_text=KEY, goal_text=GOAL)
     return set(path_to_key).union(set(path_to_goal))
+
 
 def get_placeable_positions_inc_path(level):
     floor_tiles = get_positions(level, ".")
@@ -307,19 +341,21 @@ def get_placeable_positions_inc_path(level):
     placeable_pos = set(floor_tiles) - non_placeable_pos
     return placeable_pos
 
+
 def expand(level, axis=0):
     height, width = level.shape
     if axis == 0:
-        index = np.random.randint(low=1, high=height-1)
+        index = np.random.randint(low=1, high=height - 1)
     elif axis == 1:
-        index = np.random.randint(low=1, high=width-1)
+        index = np.random.randint(low=1, high=width - 1)
     if axis == 0:
-        new_row = np.array([WALL] + [EMPTY]*(width-2) + [WALL])
+        new_row = np.array([WALL] + [EMPTY] * (width - 2) + [WALL])
         level = np.vstack((level[:index, :], new_row, level[index:, :]))
     elif axis == 1:
-        new_column = np.array([[WALL] + [EMPTY]*(height-2) + [WALL]])
+        new_column = np.array([[WALL] + [EMPTY] * (height - 2) + [WALL]])
         level = np.hstack((level[:, :index], new_column.T, level[:, index:]))
     return level
+
 
 def is_solvable(level):
     try:
@@ -329,24 +365,27 @@ def is_solvable(level):
     except ValueError:
         return False
 
+
 def remove_index(level, index, axis=0):
     if axis == 0:
-        new_level = np.vstack((level[:index, :], level[index+1:, :]))
+        new_level = np.vstack((level[:index, :], level[index + 1 :, :]))
     elif axis == 1:
-        new_level = np.hstack((level[:, :index], level[:, index+1:]))
+        new_level = np.hstack((level[:, :index], level[:, index + 1 :]))
     return new_level
+
 
 def breaks_connectivity(level, index, axis=0):
     """Checks if removing col/row index breaks connectivity"""
     new_level = remove_index(level, index, axis=axis)
     return not is_solvable(new_level)
 
+
 def shrink(level, axis=0):
     height, width = level.shape
     if axis == 0:
-        removable_indices = set(range(1, height-1))
+        removable_indices = set(range(1, height - 1))
     elif axis == 1:
-        removable_indices = set(range(1, width-1))
+        removable_indices = set(range(1, width - 1))
     avatar_pos = get_positions(level, AVATAR)[0]
     key_pos = get_positions(level, KEY)[0]
     goal_pos = get_positions(level, GOAL)[0]
@@ -358,9 +397,10 @@ def shrink(level, axis=0):
             return remove_index(level, selected_index, axis=axis)
         else:
             removable_indices.remove(selected_index)
-    
+
     print(f"All indices along axis {axis} seem to be important.")
     return level
+
 
 def add_enemies(level, amount):
     """
@@ -373,6 +413,7 @@ def add_enemies(level, amount):
         pos = floor_tiles.pop()
         enemy = random.choice([ENEMY1, ENEMY2, ENEMY3])
         level[pos] = enemy
+
 
 def remove_enemies(level, amount):
     """
@@ -387,6 +428,7 @@ def remove_enemies(level, amount):
     for _ in range(min(len(enemy_pos), amount)):
         pos = enemy_pos.pop()
         level[pos] = EMPTY
+
 
 def add_walls(level, amount):
     """
@@ -403,13 +445,14 @@ def add_walls(level, amount):
         level[pos] = WALL
         assert is_solvable(level), "Level isn't solvable. There's a bug in add_walls"
 
+
 def remove_walls(level, amount):
     """
     This function removes {amount} walls in the inner part of the level.
     """
     height, width = level.shape
-    inner_level = level[1:height-1, 1:width-1]
-    wall_pos = [(x+1, y+1) for (x,y) in get_positions(inner_level, WALL)]
+    inner_level = level[1 : height - 1, 1 : width - 1]
+    wall_pos = [(x + 1, y + 1) for (x, y) in get_positions(inner_level, WALL)]
     random.shuffle(wall_pos)
     for _ in range(min(len(wall_pos), amount)):
         pos = wall_pos.pop()

@@ -7,10 +7,10 @@ This repo contains all the code related to the paper *Finding Game Levels with t
 
 Intelligent Trial-and-Error (ITAE) is the name given to applying Bayesian Optimization to a corpus of "behaviors" (e.g. levels, robot gaits or environments for Reinforcement Learning) learned using the evolutionary algorithm MAP-Elites.
 
-In this paper we try to apply ITAE for finding levels with a certain win rate for several planning agents. We start by computing several priors for these agents using MAP-Elites, and we then finding ideal levels for all pairs (e.g. using levels optimized for an MCTS agent, trying to find a level that's good for Rolling-Horizon evolution).
+In this paper we apply ITAE for finding levels with a certain win rate for several planning agents. We start by computing priors for these agents using MAP-Elites, and then finding ideal levels for all pairs (e.g. using levels optimized for an MCTS agent, trying to find a level that's good for Rolling-Horizon evolution).
 ## A guide through the code
 
-This code relies on two small libraries I wrote, which implement MAP-Elites and ITAE ([pymelites](https://github.com/miguelgondu/pymelites) and [pyITaE](https://github.com/miguelgondu/pyITaE) respectively). So you can start by cloning them and installing them using `pip install -e .`.
+This code relies on two small libraries I wrote, which implement MAP-Elites and ITAE ([pymelites](https://github.com/miguelgondu/pymelites) and [pyITaE](https://github.com/miguelgondu/pyITaE) respectively). So start by cloning them and installing them using `pip install -e .`.
 
 After that, the core work done for the experiments is done by `zelda_map_elites_experiment.py` (which evolves a corpus of levels for a certain agent), and by `zelda_itae_experiment.py` (which takes one of these generations and updates it using B.O.) This pieces of code rely on a custom version of the [GVGAI game compiler](https://github.com/GAIGResearch/GVGAI).
 

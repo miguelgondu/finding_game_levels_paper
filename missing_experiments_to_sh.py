@@ -11,15 +11,18 @@ agents = {
     "greedyTreeSearch": "tracks.singlePlayer.simple.greedyTreeSearch.Agent",
     "sampleonesteplookahead": "tracks.singlePlayer.simple.sampleonesteplookahead.Agent",
     "sampleRandom": "tracks.singlePlayer.simple.sampleRandom.Agent",
-    "doNothing": "tracks.singlePlayer.simple.doNothing.Agent"
+    "doNothing": "tracks.singlePlayer.simple.doNothing.Agent",
 }
 
 with open("./zelda_experiments/final_tables/update_iterations.json") as fp:
     update_iterations = json.load(fp)
 
+
 def write_line(prior_folder, agent, iterations):
     prior_agent = prior_folder.replace("_prior", "")
-    prior_file = glob.glob(f"./zelda_experiments/generations/generation_*{prior_agent}*9.json")
+    prior_file = glob.glob(
+        f"./zelda_experiments/generations/generation_*{prior_agent}*9.json"
+    )
     assert len(prior_file) == 1
     prior_file = prior_file[0]
 
@@ -37,6 +40,7 @@ def write_line(prior_folder, agent, iterations):
     command += f"> log_{prior_folder}_to_{agent.split('.')[-2]}.txt "
 
     return command
+
 
 script = ""
 for prior_folder, updates_per_agent in update_iterations.items():
